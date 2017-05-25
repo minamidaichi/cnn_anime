@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Heatmaps</title>
+    <style>
+      /* to have the map be displayed as large as possible */
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization"></script>
+    <script>
+var map, pointarray, heatmap;
+
+// sample data
+var sampleData = [
+  new google.maps.LatLng(41.869741,-87.721538),
+  new google.maps.LatLng(48.19395,-2.125265),
+  new google.maps.LatLng(3.580724,98.628154),
+  new google.maps.LatLng(4.580501,-74.081261),
+  new google.maps.LatLng(-26.882332,26.659449),
+  new google.maps.LatLng(-24.654812,25.958468),
+  new google.maps.LatLng(29.968636,-95.459855),
+  new google.maps.LatLng(48.713171,44.502881),
+  new google.maps.LatLng(34.93339,-81.985014),
+  new google.maps.LatLng(40.376906,-105.518854),
+  new google.maps.LatLng(-2.122002,-79.906566),
+  new google.maps.LatLng(40.777568,30.396123),
+  new google.maps.LatLng(-29.894143,-50.247492),
+  new google.maps.LatLng(40.829574,-96.726031),
+  new google.maps.LatLng(44.228229,-76.529446),
+  new google.maps.LatLng(-22.791815,-43.363159),
+  new google.maps.LatLng(41.012075,28.951118),
+  new google.maps.LatLng(43.455311,6.696321),
+  new google.maps.LatLng(40.987747,28.878675),
+  new google.maps.LatLng(44.511357,-73.062096),
+  new google.maps.LatLng(38.581522,-89.925273),
+  new google.maps.LatLng(43.301556,5.368706),
+  new google.maps.LatLng(38.091917,-3.645525),
+  new google.maps.LatLng(36.897981,30.633576),
+  new google.maps.LatLng(10.118712,-71.253339),
+  new google.maps.LatLng(51.189495,5.528259),
+  new google.maps.LatLng(-23.531079,-46.526215),
+  new google.maps.LatLng(40.8369,-74.114526),
+  new google.maps.LatLng(37.13042,-94.479282),
+  new google.maps.LatLng(39.640009,-77.716111),
+  new google.maps.LatLng(-13.013756,-38.486381),
+  new google.maps.LatLng(-34.201277,-56.342408),
+  new google.maps.LatLng(10.919255,-74.80918),
+  new google.maps.LatLng(42.69738,-83.245338),
+  new google.maps.LatLng(51.453926,-3.180561),
+  new google.maps.LatLng(28.658053,77.225473),
+  new google.maps.LatLng(43.035312,-76.13877),
+  new google.maps.LatLng(26.368914,50.123148),
+  new google.maps.LatLng(-31.378565,-64.165087),
+  new google.maps.LatLng(35.368463,-81.506347),
+  new google.maps.LatLng(33.757625,-84.401357),
+  new google.maps.LatLng(40.491088,-3.662337),
+  new google.maps.LatLng(33.528219,-85.133143),
+  new google.maps.LatLng(41.807787,12.479548),
+  new google.maps.LatLng(-37.970056,-57.612154),
+  new google.maps.LatLng(51.98949,1.392392),
+  new google.maps.LatLng(41.512915,-81.466155),
+  new google.maps.LatLng(7.912032,-72.493505),
+  new google.maps.LatLng(-23.351162,-51.1873),
+  new google.maps.LatLng(36.201708,-81.700396),
+  new google.maps.LatLng(43.112279,-83.652649),
+  new google.maps.LatLng(51.877076,12.653746),
+  new google.maps.LatLng(6.420195,100.416817),
+  new google.maps.LatLng(31.325244,37.361949),
+  new google.maps.LatLng(48.9481,2.236714),
+  new google.maps.LatLng(-27.708866,-53.962288),
+  new google.maps.LatLng(42.980997,-87.94887),
+  new google.maps.LatLng(40.151149,-104.938639),
+  new google.maps.LatLng(32.884038,-97.297599),
+  new google.maps.LatLng(58.036561,39.111782),
+  new google.maps.LatLng(40.254157,-75.807626),
+  new google.maps.LatLng(-34.808521,-56.160179),
+  new google.maps.LatLng(41.8369,-87.6844),
+  new google.maps.LatLng(10.118712,-71.253339),
+  new google.maps.LatLng(30.033776,-89.955507),
+  new google.maps.LatLng(38.618279,27.422036),
+  new google.maps.LatLng(-22.972435,-43.186386),
+  new google.maps.LatLng(-7.647608,111.528889),
+  new google.maps.LatLng(14.838083,-91.500155),
+  new google.maps.LatLng(43.451903,-83.949347),
+  new google.maps.LatLng(52.624694,-1.197507),
+  new google.maps.LatLng(36.106227,-5.448284),
+  new google.maps.LatLng(34.420831,-119.69819),
+  new google.maps.LatLng(39.243791,-82.191701),
+  new google.maps.LatLng(43.6177,-73.962748),
+  new google.maps.LatLng(38.403184,26.994669),
+  new google.maps.LatLng(53.773308,-1.765792),
+  new google.maps.LatLng(51.32552,-1.053326),
+  new google.maps.LatLng(42.146086,-72.400803),
+  new google.maps.LatLng(-34.601558,-58.530852),
+  new google.maps.LatLng(52.235012,-7.113571),
+  new google.maps.LatLng(46.254375,7.004024),
+  new google.maps.LatLng(41.056631,28.865406),
+  new google.maps.LatLng(-16.734154,-49.30822),
+  new google.maps.LatLng(38.702756,-8.970666),
+  new google.maps.LatLng(41.079022,28.924318),
+  new google.maps.LatLng(-22.467244,-50.609785),
+  new google.maps.LatLng(50.807499,0.294177),
+  new google.maps.LatLng(52.296889,4.96612),
+  new google.maps.LatLng(-27.684219,-48.483165),
+  new google.maps.LatLng(-34.8927,-56.160802),
+  new google.maps.LatLng(28.069146,-82.433176),
+  new google.maps.LatLng(-23.962148,-46.323084),
+  new google.maps.LatLng(32.409653,-90.137747),
+  new google.maps.LatLng(-6.1995,106.83294),
+  new google.maps.LatLng(33.980423,72.186674),
+  new google.maps.LatLng(51.513518,-0.123417),
+  new google.maps.LatLng(-27.586342,-48.613531),
+  new google.maps.LatLng(24.352714,37.604151),
+  new google.maps.LatLng(26.311167,50.222377)
+];
+
+
+function initialize() {
+  // the map's options
+  var mapOptions = {
+    zoom: 2,
+    center: new google.maps.LatLng(0, 135),
+    mapTypeId: google.maps.MapTypeId.SATELLITE
+  };
+
+  // the map and where to place it
+  map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+  var pointArray = new google.maps.MVCArray(sampleData);
+
+  // what data for the heatmap and how to display it
+  heatmap = new google.maps.visualization.HeatmapLayer({
+    data: pointArray,
+    radius: 10
+  });
+
+  // placing the heatmap on the map
+  heatmap.setMap(map);
+}
+
+// as soon as the document is ready the map is initialized
+google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+  </head>
+
+  <body>
+  <p>ヒートマップ</p>
+<!--
+<?php
+require_once('TwitterAppOAuth.php');
+ 
+// Consumer Key (API Key) を設定
+$consumer_key = '6x4qj7iLoWvHXQqpdRm48WcCd';
+ 
+// Consumer Secret (API Secret) を設定
+$consumer_secret = 'aL0NOijN7j4LNwyNAmoRaCwWUqE6dTZezKyhvrk20GwTsEucKe';
+ 
+// アプリケーション認証実行
+$connection = new TwitterAppOAuth($consumer_key, $consumer_secret);
+ 
+// ツイート検索パラメータの設定、「q」は検索文字列、「count」は取得件数（最大100件）
+$params = array(
+    'q'     => 'ぼっちなう',
+    'count' =>  100,
+);
+
+// リクエスト回数
+$request_number = 1;
+ 
+$tweet_texts = array();
+for ($i = 0; $i < $request_number; $i++) {
+ 
+    // ツイート検索実行
+    echo $params['count'] * $i + 1 . " - " . $params['count'] * ($i + 1) . " 件目取得中\n";
+    $tweets_obj = $connection->get('search/tweets', $params);
+ 
+    // オブジェクトを配列に変換
+    $tweets_arr = json_decode($tweets_obj, true);
+ 
+    // ツイート本文を抽出
+    for ($j = 0; $j < count($tweets_arr['statuses']); $j++) {
+        $tweet_geos[] = $tweets_arr['statuses'][$j]['geo']['coordinates'];
+        $tweet_places[] = $tweets_arr['statuses'][$j]['place']['bounding_box']['coordinates'];
+    }
+ 
+    // 先頭の「?」を除去
+    $next_results = preg_replace('/^\?/', '', $tweets_arr['search_metadata']['next_results']);
+ 
+    // next_results が無ければ処理を終了
+    if (!$next_results) {
+        break;
+    }
+ 
+    // パラメータに変換
+    parse_str($next_results, $params);
+}
+ 
+// ツイートの表示
+//$geo_cnt = 0;
+echo "\n取得件数：" . count($tweet_geos) . "\n\n";
+$data = array();
+for ($i = 0; $i < count($tweet_geos); $i++) {
+    if ($tweet_geos[$i][0] != ""){
+        $data[] = $tweet_geos[$i]
+        //$geo_cnt++;
+        //echo $tweet_geos[$i][0],",",$tweet_geos[$i][1] . "\n\n";
+    }
+    elseif($tweet_places[$i][0][0][0] != ""){
+        $data[] = $tweet_geos[$i][0][0]
+        //$geo_cnt++;
+        //echo $tweet_places[$i][0][0][0]," ",$tweet_places[$i][0][0][1] . "\n\n";
+    }
+}
+//echo "\n位置情報付き件数：" . $geo_cnt . "\n\n";
+//for (var i = 0; i < data.length; i++) {
+//var geoData = new google.maps.LatLng(markers[i][0],markers[i][1]);
+//}
+
+?>
+-->
+
+  <!-- <p><?php echo $data ?></p> -->
+    <!-- this is where the map finally is drawn onto -->
+    <div id="map-canvas"></div>
+  </body>
+</html>
